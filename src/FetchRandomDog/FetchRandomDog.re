@@ -9,6 +9,24 @@ type state =
 let make = () => {
   let (state, setState) = React.useState(() => LoadingDogs);
 
+  let add_dog = () => {
+
+    Js.Promise.(
+      fetch("https://dog.ceo/api/breeds/image/random/1")
+      |> then_(response => response##json())
+      |> then_(jsonResponse => {
+           setState(_previousState => LoadedDogs(jsonResponse##message));
+           Js.Promise.resolve();
+         })
+      |> catch(_err => {
+           setState(_previousState => ErrorFetchingDogs);
+           Js.Promise.resolve();
+         })
+      |> ignore
+    );
+
+  } 
+
   // Notice that instead of `useEffect`, we have `useEffect0`. See
   // reasonml.github.io/reason-react/docs/en/components#hooks for more info
   React.useEffect0(() => {
@@ -68,6 +86,6 @@ let make = () => {
          ->React.array
        }}
     </div>
-    <button> {React.string("New dog")} </button>
+    <button onClick={ _event => add_dog()} > {React.string("New dog")} </button>
   </>;
 };
